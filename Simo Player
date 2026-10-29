@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simo Player - Professional IPTV</title>
-    <!-- Tailwind CSS for Modern Styling -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Cairo for Arabic & Inter for English -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- HLS.js for powerful video stream playback -->
+    <!-- HLS.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -22,10 +21,6 @@
                         cardBg: '#131c2e',
                         accent: '#6366f1',
                         accentHover: '#4f46e5'
-                    },
-                    fontFamily: {
-                        arabic: ['Cairo', 'sans-serif'],
-                        english: ['Inter', 'sans-serif']
                     }
                 }
             }
@@ -33,7 +28,6 @@
     </script>
     <style>
         body { font-family: 'Cairo', 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
-        /* Custom Scrollbar for smooth modern look */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0b0f19; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
@@ -43,135 +37,204 @@
 </head>
 <body class="min-h-screen flex flex-col select-none">
 
-    <!-- Top Navigation Bar -->
-    <header class="glass-panel sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-gray-800">
-        <div class="flex items-center space-x-3 space-x-reverse">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                <i class="fa-solid fa-play text-white text-lg"></i>
+    <!-- LOGIN SCREEN VIEW (Visible if not logged in) -->
+    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0b0f19]/95 backdrop-blur-xl">
+        <div class="glass-panel w-full max-w-md p-8 rounded-3xl shadow-2xl border border-indigo-500/20">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-xl shadow-indigo-500/30">
+                    <i class="fa-solid fa-play text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-black text-white tracking-wider">Simo <span class="text-indigo-500">Player</span></h1>
+                <p class="text-xs text-gray-400 mt-1">أدخل بيانات السيرفر الخاص بك للاستمتاع بالمشاهدة</p>
             </div>
-            <span class="text-xl font-black tracking-wider text-white">Simo <span class="text-indigo-500">Player</span></span>
-        </div>
 
-        <!-- Smart Instant Search Bar -->
-        <div class="flex-1 max-w-md mx-6">
-            <div class="relative">
-                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
-                <input type="text" id="searchInput" oninput="filterChannels()" placeholder="ابحث عن قناة، فيلم، أو مسلسل... | Search channels..." 
-                    class="w-full bg-gray-900/80 text-sm text-gray-200 pr-10 pl-4 py-2.5 rounded-xl border border-gray-800 focus:outline-none focus:border-indigo-500 transition-all shadow-inner">
+            <!-- Login Tabs -->
+            <div class="flex bg-gray-900/80 p-1.5 rounded-2xl mb-6 border border-gray-800">
+                <button onclick="switchLoginMode('xtream')" id="tabXtream" class="flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white transition shadow">Xtream API</button>
+                <button onclick="switchLoginMode('m3u')" id="tabM3u" class="flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition">رابط M3U</button>
             </div>
+
+            <!-- Xtream Form -->
+            <form id="xtreamForm" onsubmit="handleLogin(event, 'xtream')" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">اسم السيرفر / العنوان</label>
+                    <input type="text" id="xServer" required placeholder="http://example.com:8080" class="w-full bg-gray-900 text-sm text-gray-200 px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">اسم المستخدم (Username)</label>
+                    <input type="text" id="xUser" required placeholder="Username" class="w-full bg-gray-900 text-sm text-gray-200 px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">كلمة المرور (Password)</label>
+                    <input type="password" id="xPass" required placeholder="Password" class="w-full bg-gray-900 text-sm text-gray-200 px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <button type="submit" class="w-full py-3.5 mt-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition">
+                    تسجيل الدخول / Login
+                </button>
+            </form>
+
+            <!-- M3U Form (Hidden by default) -->
+            <form id="m3uForm" onsubmit="handleLogin(event, 'm3u')" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">اسم القائمة (اختياري)</label>
+                    <input type="text" id="mName" placeholder="My Playlist" class="w-full bg-gray-900 text-sm text-gray-200 px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">رابط ملف M3U</label>
+                    <input type="url" id="mUrl" required placeholder="https://example.com/get.php?..." class="w-full bg-gray-900 text-sm text-gray-200 px-4 py-3 rounded-xl border border-gray-800 focus:outline-none focus:border-indigo-500 transition">
+                </div>
+                <button type="submit" class="w-full py-3.5 mt-6 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition">
+                    تحميل القائمة / Load Playlist
+                </button>
+            </form>
         </div>
+    </div>
 
-        <!-- Controls: Language & Favorites Shortcut -->
-        <div class="flex items-center space-x-3 space-x-reverse">
-            <button onclick="toggleFavoritesTab()" id="favToggleBtn" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm font-semibold transition flex items-center space-x-2 space-x-reverse border border-gray-700/50">
-                <i class="fa-solid fa-heart text-rose-500"></i>
-                <span id="favBtnText">المفضلات</span>
-            </button>
-            <button onclick="toggleLanguage()" class="px-3 py-2 rounded-xl bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30 text-xs font-bold transition border border-indigo-500/30">
-                <span id="langLabel">EN</span>
-            </button>
-        </div>
-    </header>
+    <!-- MAIN APP INTERFACE (Hidden until logged in) -->
+    <div id="mainApp" class="flex flex-col flex-1 h-screen overflow-hidden hidden">
+        <!-- Top Navigation Bar -->
+        <header class="glass-panel sticky top-0 z-40 px-6 py-4 flex items-center justify-between border-b border-gray-800">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-play text-white text-lg"></i>
+                </div>
+                <span class="text-xl font-black tracking-wider text-white">Simo <span class="text-indigo-500">Player</span></span>
+            </div>
 
-    <!-- Main Content Layout -->
-    <div class="flex flex-1 overflow-hidden">
-        
-        <!-- Sidebar Categories -->
-        <aside class="w-64 glass-panel border-l border-gray-800 flex flex-col p-4 space-y-2 overflow-y-auto">
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-2" id="categoriesTitle">التصنيفات / Categories</div>
-            <button onclick="selectCategory('all')" id="cat-all" class="cat-btn w-full text-right px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm transition flex items-center space-x-3 space-x-reverse shadow-lg shadow-indigo-600/20">
-                <i class="fa-solid fa-globe w-5"></i>
-                <span id="txtAll">كل القنوات</span>
-            </button>
-            <button onclick="selectCategory('sports')" id="cat-sports" class="cat-btn w-full text-right px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-semibold text-sm transition flex items-center space-x-3 space-x-reverse">
-                <i class="fa-solid fa-futbol w-5 text-emerald-400"></i>
-                <span id="txtSports">رياضة / Sports</span>
-            </button>
-            <button onclick="selectCategory('movies')" id="cat-movies" class="cat-btn w-full text-right px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-semibold text-sm transition flex items-center space-x-3 space-x-reverse">
-                <i class="fa-solid fa-film w-5 text-amber-400"></i>
-                <span id="txtMovies">أفلام / Movies</span>
-            </button>
-            <button onclick="selectCategory('series')" id="cat-series" class="cat-btn w-full text-right px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-semibold text-sm transition flex items-center space-x-3 space-x-reverse">
-                <i class="fa-solid fa-tv w-5 text-sky-400"></i>
-                <span id="txtSeries">مسلسلات / Series</span>
-            </button>
-        </aside>
-
-        <!-- Center Stage / Channels Grid & Video Player Area -->
-        <main class="flex-1 p-6 overflow-y-auto flex flex-col">
-            
-            <!-- Video Player Section (Hidden by default until a channel is selected) -->
-            <div id="playerContainer" class="mb-6 hidden">
-                <div class="bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative aspect-video max-h-[500px] flex items-center justify-center">
-                    <video id="videoPlayer" class="w-full h-full object-contain" controls autoplay></video>
-                    <div id="playerOverlay" class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 flex items-center space-x-3 space-x-reverse">
-                        <span id="currentPlayingTitle" class="text-sm font-bold text-white"></span>
-                        <button onclick="closePlayer()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
-                    </div>
+            <!-- Smart Instant Search Bar -->
+            <div class="flex-1 max-w-md mx-6">
+                <div class="relative">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="searchInput" oninput="filterChannels()" placeholder="ابحث عن قناة، فيلم، أو مسلسل..." 
+                        class="w-full bg-gray-900/80 text-sm text-gray-200 pr-10 pl-4 py-2.5 rounded-xl border border-gray-800 focus:outline-none focus:border-indigo-500 transition-all shadow-inner">
                 </div>
             </div>
 
-            <!-- Header of Grid -->
-            <div class="flex items-center justify-between mb-4">
-                <h2 id="sectionTitle" class="text-lg font-bold text-white flex items-center space-x-2 space-x-reverse">
-                    <span>قائمة القنوات المتاحة</span>
-                </h2>
-                <span id="resultsCount" class="text-xs text-gray-400">0 قناة</span>
+            <!-- Controls: Logout, Favorites, Language -->
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <button onclick="toggleFavoritesTab()" id="favToggleBtn" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm font-semibold transition flex items-center space-x-2 space-x-reverse border border-gray-700/50">
+                    <i class="fa-solid fa-heart text-rose-500"></i>
+                    <span id="favBtnText">المفضلات</span>
+                </button>
+                <button onclick="logout()" title="تسجيل الخروج" class="px-3 py-2 rounded-xl bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-xs font-bold transition border border-rose-500/30">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
             </div>
+        </header>
 
-            <!-- Channels / Streams Grid -->
-            <div id="channelsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                <!-- Dynamic Content injected via JavaScript -->
-            </div>
-        </main>
+        <!-- Content Layout -->
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Sidebar Categories -->
+            <aside class="w-64 glass-panel border-l border-gray-800 flex flex-col p-4 space-y-2 overflow-y-auto">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-2" id="categoriesTitle">التصنيفات</div>
+                <button onclick="selectCategory('all')" id="cat-all" class="cat-btn w-full text-right px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm transition flex items-center space-x-3 space-x-reverse shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-globe w-5"></i>
+                    <span id="txtAll">كل القنوات</span>
+                </button>
+                <button onclick="selectCategory('sports')" id="cat-sports" class="cat-btn w-full text-right px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-semibold text-sm transition flex items-center space-x-3 space-x-reverse">
+                    <i class="fa-solid fa-futbol w-5 text-emerald-400"></i>
+                    <span id="txtSports">رياضة / Sports</span>
+                </button>
+                <button onclick="selectCategory('movies')" id="cat-movies" class="cat-btn w-full text-right px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-semibold text-sm transition flex items-center space-x-3 space-x-reverse">
+                    <i class="fa-solid fa-film w-5 text-amber-400"></i>
+                    <span id="txtMovies">أفلام / Movies</span>
+                </button>
+                <button onclick="selectCategory('series')" id="cat-series" class="cat-btn w-full text-right px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-semibold text-sm transition flex items-center space-x-3 space-x-reverse">
+                    <i class="fa-solid fa-tv w-5 text-sky-400"></i>
+                    <span id="txtSeries">مسلسلات / Series</span>
+                </button>
+            </aside>
+
+            <!-- Main Stage -->
+            <main class="flex-1 p-6 overflow-y-auto flex flex-col">
+                <!-- Video Player Section -->
+                <div id="playerContainer" class="mb-6 hidden">
+                    <div class="bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative aspect-video max-h-[500px] flex items-center justify-center">
+                        <video id="videoPlayer" class="w-full h-full object-contain" controls autoplay></video>
+                        <div id="playerOverlay" class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 flex items-center space-x-3 space-x-reverse">
+                            <span id="currentPlayingTitle" class="text-sm font-bold text-white"></span>
+                            <button onclick="closePlayer()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mb-4">
+                    <h2 id="sectionTitle" class="text-lg font-bold text-white">قائمة القنوات المتاحة</h2>
+                    <span id="resultsCount" class="text-xs text-gray-400">0 قناة</span>
+                </div>
+
+                <div id="channelsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+            </main>
+        </div>
     </div>
 
-    <!-- JavaScript Application Logic -->
+    <!-- Application Script -->
     <script>
-        // Sample channels data simulating high performance IPTV backend
         const channels = [
-            { id: 1, name: "beIN Sports 1 HD", category: "sports", url: "https://test-streams.mux.dev/x36hls/url_6/193039.m3u8", logo: "https://i.imgur.com/83Z93rN.png" },
-            { id: 2, name: "beIN Sports 2 HD", category: "sports", url: "https://test-streams.mux.dev/x36hls/url_0/193039.m3u8", logo: "https://i.imgur.com/83Z93rN.png" },
-            { id: 3, name: "SSC 1 HD Sports", category: "sports", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8", logo: "https://i.imgur.com/6qK4g7D.png" },
-            { id: 4, name: "OSN Movies First", category: "movies", url: "https://test-streams.mux.dev/x36hls/url_3/193039.m3u8", logo: "https://i.imgur.com/3ZQ3rN.png" },
-            { id: 5, name: "Rotana Cinema", category: "movies", url: "https://test-streams.mux.dev/x36hls/url_2/193039.m3u8", logo: "https://i.imgur.com/5ZQ3rN.png" },
-            { id: 6, name: "MBC Masr Series", category: "series", url: "https://test-streams.mux.dev/x36hls/url_1/193039.m3u8", logo: "https://i.imgur.com/7ZQ3rN.png" },
-            { id: 7, name: "Netflix Cinema Hub", category: "movies", url: "https://test-streams.mux.dev/x36hls/url_4/193039.m3u8", logo: "https://i.imgur.com/9ZQ3rN.png" }
+            { id: 1, name: "beIN Sports 1 HD", category: "sports", url: "https://test-streams.mux.dev/x36hls/url_6/193039.m3u8" },
+            { id: 2, name: "beIN Sports 2 HD", category: "sports", url: "https://test-streams.mux.dev/x36hls/url_0/193039.m3u8" },
+            { id: 3, name: "SSC 1 HD Sports", category: "sports", url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" },
+            { id: 4, name: "OSN Movies First", category: "movies", url: "https://test-streams.mux.dev/x36hls/url_3/193039.m3u8" },
+            { id: 5, name: "Rotana Cinema", category: "movies", url: "https://test-streams.mux.dev/x36hls/url_2/193039.m3u8" },
+            { id: 6, name: "MBC Masr Series", category: "series", url: "https://test-streams.mux.dev/x36hls/url_1/193039.m3u8" },
+            { id: 7, name: "Netflix Cinema Hub", category: "movies", url: "https://test-streams.mux.dev/x36hls/url_4/193039.m3u8" }
         ];
 
         let currentCategory = 'all';
         let favorites = JSON.parse(localStorage.getItem('simo_favs')) || [];
         let isFavoritesView = false;
-        let currentLang = 'ar';
         let hlsInstance = null;
 
-        // Translations dictionary for Arabic / English support
-        const translations = {
-            ar: {
-                searchPlaceholder: "ابحث عن قناة، فيلم، أو مسلسل...",
-                favs: "المفضلات",
-                allChannels: "كل القنوات",
-                sports: "رياضة / Sports",
-                movies: "أفلام / Movies",
-                series: "مسلسلات / Series",
-                categories: "التصنيفات / Categories",
-                availableChannels: "قائمة القنوات المتاحة",
-                channelsCount: "قناة"
-            },
-            en: {
-                searchPlaceholder: "Search channel, movie, or series...",
-                favs: "Favorites",
-                allChannels: "All Channels",
-                sports: "Sports",
-                movies: "Movies",
-                series: "Series",
-                categories: "Categories",
-                availableChannels: "Available Channels",
-                channelsCount: "channels"
+        // Check if already logged in
+        window.onload = () => {
+            const session = localStorage.getItem('simo_session');
+            if (session) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                renderChannels();
             }
         };
+
+        function switchLoginMode(mode) {
+            const xtreamBtn = document.getElementById('tabXtream');
+            const m3uBtn = document.getElementById('tabM3u');
+            const xtreamForm = document.getElementById('xtreamForm');
+            const m3uForm = document.getElementById('m3uForm');
+
+            if (mode === 'xtream') {
+                xtreamBtn.className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white transition shadow";
+                m3uBtn.className = "flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition";
+                xtreamForm.classList.remove('hidden');
+                m3uForm.classList.add('hidden');
+            } else {
+                m3uBtn.className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white transition shadow";
+                xtreamBtn.className = "flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition";
+                m3uForm.classList.remove('hidden');
+                xtreamForm.classList.add('hidden');
+            }
+        }
+
+        function handleLogin(event, type) {
+            event.preventDefault();
+            let sessionData = { type };
+            if (type === 'xtream') {
+                sessionData.server = document.getElementById('xServer').value;
+                sessionData.user = document.getElementById('xUser').value;
+            } else {
+                sessionData.url = document.getElementById('mUrl').value;
+            }
+            localStorage.setItem('simo_session', JSON.stringify(sessionData));
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            renderChannels();
+        }
+
+        function logout() {
+            localStorage.removeItem('simo_session');
+            location.reload();
+        }
 
         function renderChannels() {
             const grid = document.getElementById('channelsGrid');
@@ -183,13 +246,13 @@
                 return matchesCategory && matchesSearch;
             });
 
-            document.getElementById('resultsCount').innerText = `${filtered.length} ${translations[currentLang].channelsCount}`;
+            document.getElementById('resultsCount').innerText = `${filtered.length} قناة`;
 
             if (filtered.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full py-16 text-center text-gray-500">
                         <i class="fa-solid fa-face-frown text-4xl mb-3 text-gray-600"></i>
-                        <p class="text-sm font-semibold">عذراً، لم نجد نتائج مطابقة لبحثك</p>
+                        <p class="text-sm font-semibold">عذراً، لم نجد نتائج مطابقة</p>
                     </div>
                 `;
                 return;
@@ -214,9 +277,7 @@
             }).join('');
         }
 
-        function filterChannels() {
-            renderChannels();
-        }
+        function filterChannels() { renderChannels(); }
 
         function selectCategory(cat) {
             isFavoritesView = false;
@@ -225,7 +286,7 @@
                 btn.className = "cat-btn w-full text-right px-4 py-3 rounded-xl text-gray-400 hover:bg-gray-800 hover:text-gray-200 font-semibold text-sm transition flex items-center space-x-3 space-x-reverse";
             });
             document.getElementById(`cat-${cat}`).className = "cat-btn w-full text-right px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm transition flex items-center space-x-3 space-x-reverse shadow-lg shadow-indigo-600/25";
-            document.getElementById('favToggleBtn').classList.remove('bg-rose-600/20', 'border-rose-500/50');
+            document.getElementById('sectionTitle').innerText = "قائمة القنوات المتاحة";
             renderChannels();
         }
 
@@ -234,10 +295,10 @@
             const btn = document.getElementById('favToggleBtn');
             if (isFavoritesView) {
                 btn.classList.add('bg-rose-600/20', 'border-rose-500/50');
-                document.getElementById('sectionTitle').innerText = currentLang === 'ar' ? 'القنوات المفضلة' : 'Favorite Channels';
+                document.getElementById('sectionTitle').innerText = 'القنوات المفضلة';
             } else {
                 btn.classList.remove('bg-rose-600/20', 'border-rose-500/50');
-                document.getElementById('sectionTitle').innerText = translations[currentLang].availableChannels;
+                document.getElementById('sectionTitle').innerText = 'قائمة القنوات المتاحة';
             }
             renderChannels();
         }
@@ -245,11 +306,7 @@
         function toggleFavorite(id, event) {
             event.stopPropagation();
             const index = favorites.indexOf(id);
-            if (index > -1) {
-                favorites.splice(index, 1);
-            } else {
-                favorites.push(id);
-            }
+            if (index > -1) { favorites.splice(index, 1); } else { favorites.push(id); }
             localStorage.setItem('simo_favs', JSON.stringify(favorites));
             renderChannels();
         }
@@ -281,27 +338,6 @@
             if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
             container.classList.add('hidden');
         }
-
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            const t = translations[currentLang];
-            document.documentElement.lang = currentLang;
-            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-
-            document.getElementById('langLabel').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
-            document.getElementById('favBtnText').innerText = t.favs;
-            document.getElementById('categoriesTitle').innerText = t.categories;
-            document.getElementById('txtAll').innerText = t.allChannels;
-            document.getElementById('txtSports').innerText = t.sports;
-            document.getElementById('txtMovies').innerText = t.movies;
-            document.getElementById('txtSeries').innerText = t.series;
-            document.getElementById('sectionTitle').innerText = t.availableChannels;
-            renderChannels();
-        }
-
-        // Initialize App Render
-        window.onload = () => { renderChannels(); };
     </script>
 </body>
 </html>
